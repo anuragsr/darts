@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>Image Tagging application using Darts</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/jquery.minicolors.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body class="bg-dark">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12 text-center mt-3 text-white">
+				<h1>Image Tagging application using Darts</h1>
+			    <div class="input-group mt-3">
+				  <input type="text" class="form-control" id="imgUrl" placeholder="Enter Image URL Here" />
+				  <div class="input-group-append">
+				    <button class="btn btn-primary" id="loadImg" type="button">Load Image</button>
+				  </div>
+				</div>
+				<div class="form-row align-items-center mt-3">
+				    <div class="col">
+				      <input id="noDarts" type="number" class="form-control mb-2" placeholder="Enter number of darts Here">
+				    </div>
+				    <div class="col">
+				      <input id="miniCo" type="text" class="form-control mb-2" placeholder="Enter line color Here">
+				    </div>
+				</div>
+				<div class="form-row text-left ml-1 mt-2 mb-2">
+					<div class="custom-control custom-checkbox mr-3 addAction">
+				        <input type="checkbox" class="custom-control-input" id="inlineCheckbox1">
+				        <label class="custom-control-label" for="inlineCheckbox1">Enable Add Darts</label>
+			      	</div>
+					<div class="custom-control custom-checkbox delAction">
+				        <input type="checkbox" class="custom-control-input" id="inlineCheckbox2">
+				        <label class="custom-control-label" for="inlineCheckbox2">Enable Delete Darts</label>
+			      	</div>
+		      	</div>
+		      	<div class="row text-left mt-3">
+			      	<div class="col info-add d-none">
+			      		<h3>You are in <span class="text-success">Add Dart</span> mode</h3>
+			      		<p>Click anywhere on the image to add a new dart. A maximum of 50 darts is allowed. You cannot move any dart while in this mode.</p>
+			      	</div>
+			    </div>
+		      	<div class="row text-left">
+			      	<div class="col info-del d-none">
+			      		<h3>You are in <span class="text-danger">Delete Dart</span> mode</h3>
+			      		<p>Click on a dart to delete it. A minimum of 5 darts is allowed. You cannot move any dart while in this mode.</p>
+			      	</div>
+		      	</div>
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-md-12 text-white img-ctn-outer">
+				<div class="img-ctn">
+					<div class="img-ctn-inner"></div>					
+				</div>
+			</div>
+			<div class="col-md-12 text-white">			
+				<div class="form-row align-items-center mt-3">				   
+				    <div class="col-auto">
+				      <button id="genJson" type="button" class="btn btn-primary mb-2">Generate JSON</button>
+				    </div>
+				</div>
+				<div class="form-group mt-3">
+				  	<label for="gen">Generated JSON:</label>
+				  	<textarea id="jsonOp" class="form-control" rows="5" placeholder="JSON will be generated here" id="gen"></textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="js/jquery-1.11.3.min.js"></script>
+	<script src="js/pixi.min.js"></script>
+	<script src="js/DartMaker.js"></script>
+	<script src="js/jquery.minicolors.min.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			var dm = new DartMaker();
+			var lineCol, addEnabled = false, delEnabled = false;
+
+			$("input#miniCo").minicolors({
+				letterCase: 'lowercase',
+				theme: 'bootstrap',
+				change: function(value) {
+					lineCol = value.replace("#", "0x");
+				}
+			});
+
+			$("#loadImg").on('click', addImage);
+			$("#genJson").on('click', getJson);
+			$(".addAction").on('click', toggleAdd);
+			$(".delAction").on('click', toggleDel);
+
+			function addImage(e){
+				e.preventDefault();
+				if($("#noDarts").val() > 50){
+					$("#noDarts").val(50)
+				}
+				dm.init({
+					img: $("#imgUrl").val(),
+					parent: $(".img-ctn"),
+					el: $(".img-ctn-inner"),
+					noDarts: $("#noDarts").val(),
+					lineColor: lineCol,
+					allowAdd: addEnabled,
+					allowDel: delEnabled
+				});
+			}
+
+			function getJson(e){
+				e.preventDefault();
+				$("#jsonOp").val(JSON.stringify(dm.getJSON()));
+			}
+
+			function toggleAdd(e){
+				if(e.target.tagName != "LABEL"){
+					if(!delEnabled){						
+						$(".info-add").toggleClass("d-none");
+						addEnabled = $(e.currentTarget).find("input").is(":checked");
+						dm.toggleAdd(addEnabled);
+					}else{
+						$(e.currentTarget).find("input").prop("checked", false);
+						alert('"One mode at a time, fellas!" -Tyler Durden');
+					}
+				}
+			}
+
+			function toggleDel(e){
+				if(e.target.tagName != "LABEL"){
+					if(!addEnabled){						
+						$(".info-del").toggleClass("d-none");
+						delEnabled = $(e.currentTarget).find("input").is(":checked");
+						dm.toggleDel(delEnabled);					
+					}else{
+						$(e.currentTarget).find("input").prop("checked", false);
+						alert('"One mode at a time, fellas!" -Tyler Durden');
+					}
+				}
+			}
+
+			$("#imgUrl").val("img/1.jpg");
+			$("#loadImg").click();		
+		})
+	</script>
+</body>
+</html>

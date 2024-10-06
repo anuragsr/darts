@@ -1,0 +1,21 @@
+body{
+	font-family: "Ubuntu Mono", monospace;
+}
+.img-ctn{
+	height: 768px;
+	background: rgba(0,0,0,0.3);
+	box-shadow: 0px 0px 10px 0px black;
+}
+.img-ctn-inner{
+	margin: 0 auto;
+}
+@media (max-width:768px)  {	
+	.img-ctn{
+		height: 500px;
+	}
+}
+@media (max-width:480px)  {	
+	.img-ctn{
+		height: 350px;
+	}
+}
